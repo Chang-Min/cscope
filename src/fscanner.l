@@ -143,7 +143,7 @@ wsnl		[ \t\r\v\f\n]|{comment}
 %o 7000
 
 /* exclusive start conditions. not available in AT&T lex -> use flex! */
-%x IN_PREPROC WAS_ENDIF WAS_IDENTIFIER WAS_ESU IN_DQUOTE IN_SQUOTE COMMENT
+%x IN_PREPROC WAS_ENDIF WAS_IDENTIFIER WAS_ESU IN_DQUOTE IN_SQUOTE COMMENT PPDEF_OUT
 
 %%
 
@@ -226,6 +226,24 @@ wsnl		[ \t\r\v\f\n]|{comment}
 			goto more;
 			/* NOTREACHED */
 		}
+
+\#if{ws}+0	yy_push_state(PPDEF_OUT);
+<PPDEF_OUT>{
+\#endif.*\n?  {
+			//printf("0 [%s]\n", yytext);
+			yy_pop_state();
+			goto eol;
+		}
+\#if{ws}+0.*\n?  {
+			//printf("1 [%s]\n", yytext);
+			yy_push_state(PPDEF_OUT);
+			goto eol;
+		}
+.*\n 	{
+			//printf("2 [%s]\n", yytext);
+			goto eol;
+		}
+}		
 
 \#{ws}*	{ /* start a preprocessor line */
 			if (rules == NO)		/* don't consider CPP for lex/yacc rules */
@@ -826,6 +844,7 @@ if{wsnl}*\(	{ 	/* ignore 'if' */
 			yy_pop_state();
 		}
 }		
+
 
 "//".*\n?		{
 			/* C++-style one-line comment */
