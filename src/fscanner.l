@@ -239,6 +239,16 @@ wsnl		[ \t\r\v\f\n]|{comment}
 			yy_push_state(PPDEF_OUT);
 			goto eol;
 		}
+\#else.*\n?  {
+			//printf("3 [%s]\n", yytext);
+			yy_pop_state();
+			goto eol;
+		}
+\#elif.*\n?  {
+			//printf("4 [%s]\n", yytext);
+			yy_pop_state();
+			goto eol;
+		}
 .*\n 	{
 			//printf("2 [%s]\n", yytext);
 			goto eol;
